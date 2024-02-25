@@ -55,14 +55,15 @@ def inc(inp,dif=1):
     return all(j-i > dif for i, j in zip(inp, inp[1:]))
 def dec(inp,dif = 1):
     return all(i -j > dif for i, j in zip(inp, inp[1:]))
-def retpose():
+def retpose(extr = False):
 #while cap.isOpened():
     # read frame
      _, frame = cap.read()
      frame = cv2.flip(frame,1)
      liine = False
      # resize the frame for portrait video
-     frame = cv2.resize(frame, (int(2048*3/4 * swi/1200), int(1080*3/4 * swi/1200)))
+     
+     frame = cv2.resize(frame, (int(1920 * swi/1200), int(1080 * swi/1200)))
      #print(frame)
      
      # convert to RGB
@@ -84,10 +85,17 @@ def retpose():
      # draw skeleton on the frame
      mp_drawing.draw_landmarks(frame, landm, mp_pose.POSE_CONNECTIONS)
      # display the frame
-     frame = frame[0:int(1080*3/4), int((2048/2-1080/2)*3/4*swi/1200):int((2048/2+1080/2)*3/4*swi/1200)] 
-     return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
+     
+     heigh = frame.shape[0]
+     widt = frame.shape[1]
+     frame = frame[0:heigh, max(0,int(widt/2-(heigh* 1.5)/2)):min(widt,int(widt/2+(heigh* 1.5)/2))]
+     frame = cv2.resize(frame,(int(frame.shape[1] * 2/4),int(frame.shape[0]* 2/4)))
+     if not extr:
+        return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
+     else: 
+        return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
      # Initialize Pygame
-def retpos(lev):
+def retpos(lev, ext = False):
 
 
     model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
@@ -156,12 +164,25 @@ def retpos(lev):
                 #print(body_language_class)
                 
                 try:
-                    return retpose(),body_language_class
+                    if not ext:
+                        return retpose(ext),body_language_class
+                    else:
+                        framt,shap = retpose(ext)
+                        return framt,body_language_class,shap
+                    
                 except:
-                    return retpose(),"none"
+                    if not ext:
+                        return retpose(ext),"None"
+                    else:
+                        framt,shap = retpose(ext)
+                        return framt,"None",shap
             except Exception as exc:
                 #print(f"{exc}")
-                return retpose(), "None"
+                if not ext:
+                    return retpose(ext), "None"
+                else:
+                    framt,shap = retpose(ext)
+                    return framt,"None",shap
                 pass
 pygame.init()
 
@@ -181,19 +202,63 @@ pygame.display.set_caption("Dance Game")
 
 # Font settings
 
+def multi(string: str, font, rect, fontColour,BGColour,  justification=0):
+        
+        
+        
+        
+        """Returns a surface containing the passed text string, reformatted
+        to fit within the given rect, word-wrapping as necessary. The text
+        will be anti-aliased.
 
+        Parameters
+        ----------
+        string - the text you wish to render. \n begins a new line.
+        font - a Font object
+        rect - a rect style giving the size of the surface requested.
+        fontColour - a three-byte tuple of the rgb value of the
+                text color. ex (0, 0, 0) = BLACK
+        BGColour - a three-byte tuple of the rgb value of the surface.
+        justification - 0 (default) left-justified
+                    1 horizontally centered
+                    2 right-justified
+
+        Returns
+        -------
+        Success - a surface object with the text rendered onto it.
+        Failure - raises a TextRectException if the text won't fit onto the surface.
+        """
+
+        finalLines = []
+        requestedLines = string.splitlines()
+        # Create a series of lines that will fit on the provided
+        # rectangle.
+        
+
+        # Let's try to write the text out on the surface.
+        surface = pygame.Surface(rect.size)
+        surface.fill(BGColour)
+        fromt = 0
+        for text in requestedLines:
+            temp = font.render(text, 1, fontColour)
+            surface.blit(temp,(rect.width-temp.get_width(),fromt))
+            fromt+= font.size(text)[1]
+        return surface
 # Define button class
 class Button:
-    def __init__(self, x, y, width, height, color, text='',text_color=BLACK,fonts=36,oc = WHITE):
+    def __init__(self, x, y, width, height, color, text='',text_color=BLACK,fonts=36,oc = None,round = True):
         self.scale = swi/800
         x = x * self.scale
         y = y * self.scale * 4/5
-        width = width * self.scale
-        height = height * self.scale
+        self.x = x
+        self.y = y
+        self.width = width * self.scale
+        self.height = height * self.scale
         fonts = int(self.scale * fonts)
-        self.font = pygame.font.Font('./mediapipe-ymca/ComicSansMS3.ttf', int(fonts/1.25))
-        self.rects = pygame.Rect(x-width*0.025, y-width*0.025, width*1.05, height+width*0.05)
-        self.rect = pygame.Rect(x, y, width, height)
+        #self.font = pygame.font.Font('./mediapipe-ymca/ComicSansMS3.ttf', int(fonts/1.25))
+        self.font = pygame.font.Font(None, int(fonts))
+        self.rects = pygame.Rect(x-self.width*0.025, y-self.width*0.025, self.width*1.05, self.height+self.width*0.05)
+        self.rect = pygame.Rect(x, y, self.width, self.height)
         
         self.color = color
         self.oc = oc
@@ -201,19 +266,31 @@ class Button:
         self.text_color = text_color
         self.make = True
         self.calls = 0
-    def draw(self, surface):
+        if not round:
+            self.scale = 0
+   
+
+    def draw(self, surface,ml = False):
         if self.calls == 0:
             print(self.text)
             self.calls+=1
         if self.make:
-            pygame.draw.rect(surface, self.oc, self.rects, 0,border_radius=int(self.scale*10))
+            if self.oc:
+                pygame.draw.rect(surface, self.oc, self.rects, 0,border_radius=int(self.scale*10))
             pygame.draw.rect(surface, self.color, self.rect, 0,border_radius=int(self.scale*10))
 
             if self.text != '':
-                text_surface = self.font.render(self.text, True, self.text_color)
-                text_rect = text_surface.get_rect()
-                text_rect.center = self.rect.center
-                surface.blit(text_surface, text_rect)
+                if not ml:
+                    text_surface = self.font.render(self.text, True, self.text_color)
+                    text_rect = text_surface.get_rect()
+                    text_rect.center = self.rect.center
+                    surface.blit(text_surface, text_rect)
+                if ml: 
+                    text_surface = multi(self.text,self.font, self.rect, self.text_color,self.color)
+                    text_rect = text_surface.get_rect()
+                    text_rect.center = self.rect.center
+                    surface.blit(text_surface, (self.x + int(0.5*self.width/2),self.y+int(0.5*self.height/2)))
+                    
     def texty(self,surface,tex = "",coord=(0,0)):
         if self.make:
             pygame.draw.rect(surface, WHITE, self.rect, 0,border_radius=int(self.scale*10))
@@ -371,6 +448,9 @@ def game(lev, dif):
                     buttonyy.color = WHITE
         buttonyy.draw(screen)
         pygame.display.flip()
+        if since() > timeTo:
+            #ex = True
+            pass
         for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         ex = True
@@ -387,20 +467,45 @@ def game(lev, dif):
         scre,pos = retpos(lev)
         last()
         times=[]
+        comp = 0
+        more = []
+        back = Button(15,15,swi/1.95,swi*4/10,WHITE,'',RED,fonts = 24,oc = RED, round = False)
+        for i in range(len(order)):
+            more.append("?")
+
+        
+        
         for act in order:
+            top = "Completed Moves:"
+            for i in more:
+                top += ("\n"+ i)
+            we = Button(550,10,200,100,WHITE,top,RED,fonts = 24,round=False)
             while scre != act:
-                scre,pos=retpos(lev)
-                screen.blit(scre,(200,50))
                 
-                wel = Button(400,50,20,10,WHITE,str(pos),RED,fonts = 48)
+                
+                screen.fill(WHITE)
+                back.draw(screen)
+                scre,pos,shap=retpos(lev,True)
+                high= Button(10,10,shap[1]/1.90,shap[0]/1.915,WHITE,'',oc=GREEN,fonts = 24,round=False)
+                high.draw(screen)
+                screen.blit(scre,(10,10))
+                
+                
+                wel = Button(20,480,600,100,WHITE,'',RED,fonts = 24,oc = RED, round = False)
+                welar = Button(280,525,60,10,WHITE,("Current Move: " + str(pos)+ "\n" +"\nPossible Score: "+ str(max(0,round(8-since(),3)))),RED,fonts = 24, round = False)
+                
+                we.draw(screen,True)
+                
                 wel.draw(screen)
+                welar.draw(screen,True)
                 pygame.display.flip()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         ex = True
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                         ex = True
-            
+            more[comp] = act
+            comp+=1
             pygame.display.flip()
             itim = last()
             if(itim<timeTo):
