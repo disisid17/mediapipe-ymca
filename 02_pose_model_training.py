@@ -218,15 +218,16 @@ python 02_pose_model_training.py --file-name ymca_training.csv --model-name ymca
 '''
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument("--training-data", type=str, required=False, default='./data/ymca_training.csv',
+    ap.add_argument("--training-data", type=str, required=False, default=str(1),
                     help="name of the training data file")
     ap.add_argument("--model-name", type=str, required=False, default=f'{model_name}',
                     help=f"name of the saved pickled model [no suffix]. Default: {model_name}.pkl")
     args = vars(ap.parse_args())
-
-    model_name = args['model_name']
-
-    X, y, classes = get_data(args['training_data'])
+    
+    
+    mnum = args['training_data']
+    model_name = f'./models/level{mnum}_pose_model'
+    X, y, classes = get_data(f'./data/level{mnum}_training.csv')
 
     best_model, best_params, best_score = find_best_model(X, y)
 
