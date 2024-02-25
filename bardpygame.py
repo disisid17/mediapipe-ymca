@@ -6,12 +6,9 @@ import numpy as np
 import pandas as pd
 import joblib
 import imutils
-import argparse
-import copy
 import random
 import time
-#from pose_predictions import *
-#import functions as fn
+
 
 swi = 0
 mp_drawing = mp.solutions.drawing_utils
@@ -229,7 +226,7 @@ def multi(string: str, font, rect, fontColour,BGColour,  justification=0):
         Failure - raises a TextRectException if the text won't fit onto the surface.
         """
 
-        finalLines = []
+        
         requestedLines = string.splitlines()
         # Create a series of lines that will fit on the provided
         # rectangle.
@@ -289,7 +286,7 @@ class Button:
                     text_surface = multi(self.text,self.font, self.rect, self.text_color,self.color)
                     text_rect = text_surface.get_rect()
                     text_rect.center = self.rect.center
-                    surface.blit(text_surface, (self.x + int(0.5*self.width/2),self.y+int(0.5*self.height/2)))
+                    surface.blit(text_surface, (self.x ,self.y))
                     
     def texty(self,surface,tex = "",coord=(0,0)):
         if self.make:
