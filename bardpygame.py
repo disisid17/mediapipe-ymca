@@ -241,7 +241,7 @@ def multi(string: str, font, rect, fontColour,BGColour,  justification=0):
         fromt = 0
         for text in requestedLines:
             temp = font.render(text, 1, fontColour)
-            surface.blit(temp,(rect.width-temp.get_width(),fromt))
+            surface.blit(temp,(rect.width/2-temp.get_width()/2,fromt))
             fromt+= font.size(text)[1]
         return surface
 # Define button class
@@ -492,7 +492,7 @@ def game(lev, dif):
                 
                 
                 wel = Button(20,480,600,100,WHITE,'',RED,fonts = 24,oc = RED, round = False)
-                welar = Button(280,525,60,10,WHITE,("Current Move: " + str(pos)+ "\n" +"\nPossible Score: "+ str(max(0,round(8-since(),3)))),RED,fonts = 24, round = False)
+                welar = Button(140,450,200,100,WHITE,("Current Move: " + str(pos)+ "\n" +"\nPossible Score: "+ str(max(0,round(8-since(),3)))),RED,fonts = 24, round = False)
                 
                 we.draw(screen,True)
                 
