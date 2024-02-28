@@ -19,45 +19,7 @@ cap = cv2.VideoCapture(0)
 last_call_time = None
 
 
-def last():
-    """
- Returns the time since the last call to this function.
 
- If this is the first time the function is called, it returns 0.
-
- Returns:
-   float: The time in seconds since the last call to this function.
- """
-    global last_call_time
-    now = time.time()
-    if last_call_time is None:
-        last_call_time = now
-        return 0
-    else:
-        elapsed_time = now - last_call_time
-        last_call_time = now
-        return elapsed_time
-
-
-def since():
-    """
- Returns the timestamp of the last call to the "last" function.
-
- This function does not reset the timer like the "last" function.
-
- Returns:
-   float: The timestamp of the last call to the "last" function.
- """
-    global last_call_time
-    return time.time() - last_call_time
-
-
-def inc(inp, dif=1):
-    return all(j - i > dif for i, j in zip(inp, inp[1:]))
-
-
-def dec(inp, dif=1):
-    return all(i - j > dif for i, j in zip(inp, inp[1:]))
 
 
 def retpose(extr=False):
@@ -189,7 +151,45 @@ def retpos(lev, ext=False):
 
 
 pygame.init()
+def last():
+    """
+ Returns the time since the last call to this function.
 
+ If this is the first time the function is called, it returns 0.
+
+ Returns:
+   float: The time in seconds since the last call to this function.
+ """
+    global last_call_time
+    now = time.time()
+    if last_call_time is None:
+        last_call_time = now
+        return 0
+    else:
+        elapsed_time = now - last_call_time
+        last_call_time = now
+        return elapsed_time
+
+
+def since():
+    """
+ Returns the timestamp of the last call to the "last" function.
+
+ This function does not reset the timer like the "last" function.
+
+ Returns:
+   float: The timestamp of the last call to the "last" function.
+ """
+    global last_call_time
+    return time.time() - last_call_time
+
+
+def inc(inp, dif=1):
+    return all(j - i > dif for i, j in zip(inp, inp[1:]))
+
+
+def dec(inp, dif=1):
+    return all(i - j > dif for i, j in zip(inp, inp[1:]))
 # Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -320,7 +320,6 @@ def create_buttons():
 def level_select_screen():
     screen.fill(BLUE)
     l1 = Button(300, 150, 200, 50, GREEN, "YMCA", oc=GREEN)
-
     l2 = Button(300, 250, 200, 50, BLACK, "Level 2", oc=YELLOW)
     hard_button = Button(300, 350, 200, 50, RED, 'Level 3', oc=RED)
     return [l1, l2, hard_button]
