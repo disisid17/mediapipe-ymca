@@ -83,10 +83,10 @@ def retpose(extr=False):
         frame = frame[0:heigh, max(0, int(widt / 2 - (heigh * 1.5) / 2)):min(widt, int(widt / 2 + (heigh * 1.5) / 2))]
         frame = cv2.resize(frame, (int(frame.shape[1] * 2 / 4), int(frame.shape[0] * 2 / 4)))
         if not extr:
-            return frame
+            return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
         else:
-            return frame, frame.shape
-
+            return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
+        
 
 """ def retpos(lev, ext=False):
     model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
@@ -177,15 +177,22 @@ def retpose(extr=False):
 
  """
 
-def retpos(lev, ext=False):
+def retpos(lev=1, ext=False):
     global cap
     global pose
     global mp_pose
     global model
     with pos_lock:
         model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
+
         suppress_landmarks = False
         add_counters = False
+
+        with open(f'{model_name}.pkl', 'rb') as f:
+            model = joblib.load(f)
+
+        # cap = cv2.VideoCapture(0)
+        # Initiate holistic model
         _, fram = cap.read()
         fram = cv2.flip(fram, 1)
         DEFAULT_IMAGE_WIDTH = fram.shape[0]
@@ -223,20 +230,34 @@ def retpos(lev, ext=False):
                 X = pd.DataFrame([row])
                 body_language_class = model.predict(X)[0]
                 body_language_prob = model.predict_proba(X)[0]
-                if not ext:
-                    return retpose(ext), body_language_class
-                else:
-                    framt, shap = retpose(ext)
-                    return framt, body_language_class, shap
+                try:
+                    if not ext:
+                        return retpose(ext), body_language_class
+                    else:
+                        framt, shap = retpose(ext)
+                        return framt, body_language_class, shap
+
+                except:
+                    if not ext:
+                        return retpose(ext), "None"
+                    else:
+                        framt, shap = retpose(ext)
+                        return framt, "None", shap
             except Exception as exc:
-                print(f"Error in retpos: {exc}")
+                # print(f"{exc}")
                 if not ext:
                     return retpose(ext), "None"
                 else:
                     framt, shap = retpose(ext)
                     return framt, "None", shap
+                pass
+
 
 pygame.init()
+pose_thread = threading.Thread(target=retpose)
+pos_thread = threading.Thread(target=retpos)
+pose_thread.start()
+pos_thread.start()
 def last():
     """
  Returns the time since the last call to this function.
@@ -564,6 +585,7 @@ def game(lev, dif):
             for i in more:
                 top += ("\n" + i)
             we = Button(550, 10, 200, 100, WHITE, top, RED, fonts=24, round=False)
+            print(scre)
             while scre != act:
 
                 screen.fill(WHITE)
