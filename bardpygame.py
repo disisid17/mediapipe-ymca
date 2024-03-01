@@ -24,7 +24,7 @@ pose_lock = threading.Lock()
 pos_lock = threading.Lock()
 
 
-""" def retpose(extr=False):
+def retpose(extr=False):
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
     liine = False
@@ -62,8 +62,8 @@ pos_lock = threading.Lock()
     else:
         return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
     # Initialize Pygame
- """
-def retpose(extr=False):
+ 
+""" def retpose(extr=False):
     global cap
     with pose_lock:
         _, frame = cap.read()
@@ -86,9 +86,9 @@ def retpose(extr=False):
             return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
         else:
             return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
-        
+         """
 
-""" def retpos(lev, ext=False):
+def retpos(lev, ext=False):
     model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
 
     suppress_landmarks = False
@@ -175,9 +175,9 @@ def retpose(extr=False):
                     return framt, "None", shap
                 pass
 
- """
+ 
 
-def retpos(lev=1, ext=False):
+""" def retpos(lev=1, ext=False):
     global cap
     global pose
     global mp_pose
@@ -251,13 +251,13 @@ def retpos(lev=1, ext=False):
                     framt, shap = retpose(ext)
                     return framt, "None", shap
                 pass
-
+ """
 
 pygame.init()
-pose_thread = threading.Thread(target=retpose)
+""" pose_thread = threading.Thread(target=retpose)
 pos_thread = threading.Thread(target=retpos)
 pose_thread.start()
-pos_thread.start()
+pos_thread.start() """
 def last():
     """
  Returns the time since the last call to this function.
@@ -585,8 +585,7 @@ def game(lev, dif):
             for i in more:
                 top += ("\n" + i)
             we = Button(550, 10, 200, 100, WHITE, top, RED, fonts=24, round=False)
-            print(scre)
-            while scre != act:
+            while pos != act:
 
                 screen.fill(WHITE)
                 back.draw(screen)
