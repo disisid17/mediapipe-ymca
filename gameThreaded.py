@@ -8,7 +8,7 @@ import joblib
 import imutils
 import random
 import time
-import threading
+
 
 
 
@@ -20,11 +20,10 @@ cap = cv2.VideoCapture(0)
 last_call_time = None
 
 
-pose_lock = threading.Lock()
-pos_lock = threading.Lock()
 
 
-""" def retpose(extr=False): 
+
+def retpose(extr=False): 
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
     liine = False
@@ -62,33 +61,10 @@ pos_lock = threading.Lock()
     else:
         return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
     # Initialize Pygame
-"""
-def retpose(extr=False):
-    global cap
-    with pose_lock:
-        _, frame = cap.read()
-        frame = cv2.flip(frame, 1)
-        liine = False
-        # resize the frame for portrait video
-        frame = cv2.resize(frame, (int(1920 * swi / 1200), int(1080 * swi / 1200)))
-        # convert to RGB
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # process the frame for pose detection
-        pose_results = pose.process(frame_rgb)
-        # draw skeleton on the frame
-        mp_drawing.draw_landmarks(frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        # display the frame
-        heigh = frame.shape[0]
-        widt = frame.shape[1]
-        frame = frame[0:heigh, max(0, int(widt / 2 - (heigh * 1.5) / 2)):min(widt, int(widt / 2 + (heigh * 1.5) / 2))]
-        frame = cv2.resize(frame, (int(frame.shape[1] * 2 / 4), int(frame.shape[0] * 2 / 4)))
-        if not extr:
-            return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
-        else:
-            return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
-         
 
-""" def retpos(lev, ext=False):
+
+
+def retpos(lev, ext=False):
     model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
 
     suppress_landmarks = False
@@ -174,90 +150,11 @@ def retpose(extr=False):
                     framt, shap = retpose(ext)
                     return framt, "None", shap
                 pass
-"""
+
  
 
-def retpos(lev=1, ext=False):
-    global cap
-    global pose
-    global mp_pose
-    global model
-    with pos_lock:
-        model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
-
-        suppress_landmarks = False
-        add_counters = False
-
-        with open(f'{model_name}.pkl', 'rb') as f:
-            model = joblib.load(f)
-
-        # cap = cv2.VideoCapture(0)
-        # Initiate holistic model
-        _, fram = cap.read()
-        fram = cv2.flip(fram, 1)
-        DEFAULT_IMAGE_WIDTH = fram.shape[0]
-        last_detected_pose = None
-        number_of_new_pose_detections = 0
-        if cap.isOpened():
-            ret, frame = cap.read()
-            frame = cv2.flip(frame, 1)
-            frame = imutils.resize(frame, width=DEFAULT_IMAGE_WIDTH)
-            # Recolor Feed
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image.flags.writeable = False
-            # Make Detections
-            results = pose.process(image)
-            # Recolor image back to BGR for rendering
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            try:
-                landmarks = results.pose_landmarks.landmark
-                arm_landmarks = []
-                pose_index = mp_pose.PoseLandmark.LEFT_SHOULDER.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                pose_index = mp_pose.PoseLandmark.RIGHT_SHOULDER.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                pose_index = mp_pose.PoseLandmark.LEFT_ELBOW.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                pose_index = mp_pose.PoseLandmark.RIGHT_ELBOW.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                pose_index = mp_pose.PoseLandmark.LEFT_WRIST.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                pose_index = mp_pose.PoseLandmark.RIGHT_WRIST.value
-                arm_landmarks += [landmarks[pose_index].x, landmarks[pose_index].y, landmarks[pose_index].z]
-                row = np.around(arm_landmarks, decimals=9).tolist()
-                # Make Detections
-                X = pd.DataFrame([row])
-                body_language_class = model.predict(X)[0]
-                body_language_prob = model.predict_proba(X)[0]
-                try:
-                    if not ext:
-                        return retpose(ext), body_language_class
-                    else:
-                        framt, shap = retpose(ext)
-                        return framt, body_language_class, shap
-
-                except:
-                    if not ext:
-                        return retpose(ext), "None"
-                    else:
-                        framt, shap = retpose(ext)
-                        return framt, "None", shap
-            except Exception as exc:
-                # print(f"{exc}")
-                if not ext:
-                    return retpose(ext), "None"
-                else:
-                    framt, shap = retpose(ext)
-                    return framt, "None", shap
-                pass
-
-
 pygame.init()
-pose_thread = threading.Thread(target=retpose)
-pos_thread = threading.Thread(target=retpos)
-pose_thread.start()
-pos_thread.start() 
+
 def last():
     """
  Returns the time since the last call to this function.
