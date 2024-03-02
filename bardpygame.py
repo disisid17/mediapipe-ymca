@@ -24,7 +24,7 @@ pose_lock = threading.Lock()
 pos_lock = threading.Lock()
 
 
-def retpose(extr=False):
+""" def retpose(extr=False): 
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
     liine = False
@@ -62,8 +62,8 @@ def retpose(extr=False):
     else:
         return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
     # Initialize Pygame
- 
-""" def retpose(extr=False):
+"""
+def retpose(extr=False):
     global cap
     with pose_lock:
         _, frame = cap.read()
@@ -86,9 +86,9 @@ def retpose(extr=False):
             return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR")
         else:
             return pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR"), frame.shape
-         """
+         
 
-def retpos(lev, ext=False):
+""" def retpos(lev, ext=False):
     model_name = f'./mediapipe-ymca/models/level{lev}_pose_model'
 
     suppress_landmarks = False
@@ -174,10 +174,10 @@ def retpos(lev, ext=False):
                     framt, shap = retpose(ext)
                     return framt, "None", shap
                 pass
-
+"""
  
 
-""" def retpos(lev=1, ext=False):
+def retpos(lev=1, ext=False):
     global cap
     global pose
     global mp_pose
@@ -251,13 +251,13 @@ def retpos(lev, ext=False):
                     framt, shap = retpose(ext)
                     return framt, "None", shap
                 pass
- """
+
 
 pygame.init()
-""" pose_thread = threading.Thread(target=retpose)
+pose_thread = threading.Thread(target=retpose)
 pos_thread = threading.Thread(target=retpos)
 pose_thread.start()
-pos_thread.start() """
+pos_thread.start() 
 def last():
     """
  Returns the time since the last call to this function.
@@ -291,12 +291,7 @@ def since():
     return time.time() - last_call_time
 
 
-def inc(inp, dif=1):
-    return all(j - i > dif for i, j in zip(inp, inp[1:]))
 
-
-def dec(inp, dif=1):
-    return all(i - j > dif for i, j in zip(inp, inp[1:]))
 # Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -364,7 +359,7 @@ class Button:
         self.height = height * self.scale
         fonts = int(self.scale * fonts)
         # self.font = pygame.font.Font('./mediapipe-ymca/ComicSansMS3.ttf', int(fonts/1.25))
-        self.font = pygame.font.Font(None, int(fonts))
+        self.font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
         self.rects = pygame.Rect(x - self.width * 0.025, y - self.width * 0.025, self.width * 1.05,
                                  self.height + self.width * 0.05)
         self.rect = pygame.Rect(x, y, self.width, self.height)
@@ -584,7 +579,7 @@ def game(lev, dif):
             top = "Completed Moves:"
             for i in more:
                 top += ("\n" + i)
-            we = Button(550, 10, 200, 100, WHITE, top, RED, fonts=24, round=False)
+            we = Button(560, 15, 200, 400, WHITE, top, RED, fonts=24, round=False)
             while pos != act:
 
                 screen.fill(WHITE)
