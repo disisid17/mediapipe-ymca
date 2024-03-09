@@ -20,7 +20,7 @@ This file will run through a number of scikit learn models on the the training d
 in training.csv.  This training data was collected through running:
 """
 
-model_name = 'best_ymca_pose_model'
+model_name = 'level1_pose_model'
 
 
 def get_data(file_name):
