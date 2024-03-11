@@ -31,6 +31,7 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 pose_lock = threading.Lock()
 last_call_time = None
 call_time = None
+font = None
 def randcol():#define a completely random color generator with all possible colors
     colo1 = choice("abcdef1234567890")
     colo2 = choice("abcdef1234567890")
@@ -42,7 +43,13 @@ def randcol():#define a completely random color generator with all possible colo
     value = hexe.lstrip('#')
     lv = len(value)
     return tuple(int(value[i:i +lv//3],16) for i in range(0,lv,lv//3))
-    
+def texer(surface,text,color, fonts,x,y):
+    font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
+    text_surface = font.render(text,True,color)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x,y)
+    surface.blit(text_surface,text_rect)
+    pass
 def fps():
     global call_time
     if call_time == None:
@@ -226,6 +233,7 @@ def multi(string: str, font, rect, fontColour, BGColour, justification=0):
 
 # Define button class
 class Button:
+    global font
     def __init__(self, x, y, width, height, color=BLACK, text='', text_color=BLACK, fonts=36, oc=WHITE, round=True, thi= 10):
         self.scale = swi / 800
         x = x * self.scale
@@ -237,6 +245,7 @@ class Button:
         fonts = int(self.scale * fonts)
         # self.font = pygame.font.Font('./mediapipe-ymca/ComicSansMS3.ttf', int(fonts/1.25))
         self.font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
+        font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
         self.rects = pygame.Rect(x - self.width * 0.025, y - self.width * 0.025, self.width * 1.05,
                                  self.height + self.width * 0.05)
         self.rect = pygame.Rect(x, y, self.width, self.height)
@@ -524,7 +533,7 @@ def game(lev, dif):
         back = Button(15, 15, swi / 1.95, swi * 4 / 10, WHITE, '', RED, fonts=24, oc=RED, round=False)
         for i in range(len(order)):
             more.append("?")
-        cors = Button(675, 350, 100, 100, WHITE, '', RED, fonts=32, round=False)
+        cors = Button(670, 350, 100, 100, WHITE, '', RED, fonts=30, round=False)
         for act in order:
             top = "Finished:"
             for i in more:
@@ -549,8 +558,10 @@ def game(lev, dif):
                         max(0, round(8 - since(), 3)))), RED, fonts=24, round=False)
 
                 we.draw(screen, True)
-                if since()>5:
-                    cors.draw(screen)
+                if since()>1.5:
+                    cors.draw(screen,newt = '')
+                else:
+                    cors.draw(screen,newt = 'CORRECT!')
                 wel.draw(screen)
                 welar.draw(screen, True)
                 pygame.display.flip()
@@ -589,6 +600,12 @@ def game(lev, dif):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 ex = True
 
+def endgame(psco):
+    screen.fill(WHITE)
+    while(since()<10):
+        text = f"Final Score: {psco}"
+        texer(screen,text,24,WHITE,200,400)
+
     
 pose_thread = threading.Thread(target=retpose)
 pose_thread.start()
@@ -615,6 +632,7 @@ if __name__ == '__main__':
         print(dif)
         print(lev)
         psco = game(lev, dif)
+        endgame(psco)
         redo()
                 
         #if cv2.waitKey(1) & 0xFF == ord('q'):
