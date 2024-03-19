@@ -243,7 +243,6 @@ class Button:
         self.width = width * self.scale
         self.height = height * self.scale
         fonts = int(self.scale * fonts)
-        # self.font = pygame.font.Font('./mediapipe-ymca/ComicSansMS3.ttf', int(fonts/1.25))
         self.font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
         font = pygame.font.Font("./mediapipe-ymca/ComicSansMS3.ttf", int(fonts/1.25))
         self.rects = pygame.Rect(x - self.width * 0.025, y - self.width * 0.025, self.width * 1.05,
@@ -620,7 +619,7 @@ if __name__ == '__main__':
     model_name = 'level1_pose_model'
     
 
-    with open(f'./test/mediapipe-ymca/{model_name}.pkl', 'rb') as f:
+    with open(f'./danceOff/models/{model_name}.pkl', 'rb') as f:
         model = joblib.load(f)
 
     
